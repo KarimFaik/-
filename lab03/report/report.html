@@ -1,0 +1,948 @@
+<hr />
+<h2 id="front-matter">Front matter</h2>
+<p>title: "Отчёт по лабораторной работе №3</p>
+<p>Информационная безопасность" subtitle: “Дискреционное разграничение прав в Linux. Два пользователя” author: "Фаик Карим Яссерович</p>
+<h2 id="generic-otions">Generic otions</h2>
+<p>lang: ru-RU toc-title: “Содержание”</p>
+<h2 id="bibliography">Bibliography</h2>
+<p>bibliography: bib/cite.bib csl: pandoc/csl/gost-r-7-0-5-2008-numeric.csl</p>
+<h2 id="pdf-output-format">Pdf output format</h2>
+toc: true # Table of contents toc-depth: 2 lof: true # List of figures fontsize: 12pt linestretch: 1.5 papersize: a4 documentclass: scrreprt ## I18n polyglossia polyglossia-lang: name: russian options: - spelling=modern - babelshorthands=true polyglossia-otherlangs: name: english ## I18n babel babel-lang: russian babel-otherlangs: english ## Fonts mainfont: PT Serif romanfont: PT Serif sansfont: PT Sans monofont: PT Mono mainfontoptions: Ligatures=TeX romanfontoptions: Ligatures=TeX sansfontoptions: Ligatures=TeX,Scale=MatchLowercase monofontoptions: Scale=MatchLowercase,Scale=0.9 ## Biblatex biblatex: true biblio-style: “gost-numeric” biblatexoptions: - parentracker=true - backend=biber - hyperref=auto - language=auto - autolang=other* - citestyle=gost-numeric ## Pandoc-crossref LaTeX customization figureTitle: “Рис.” tableTitle: “Таблица” listingTitle: “Листинг” lofTitle: “Список иллюстраций” lolTitle: “Листинги” ## Misc options indent: true header-includes: -
+<ul>
+<li><h1 id="keep-figures-where-there-are-in-the-text">keep figures where there are in the text</h1>
+<ul>
+<li><h2 id="keep-figures-where-there-are-in-the-text-1"> # keep figures where there are in the text</h2></li>
+</ul></li>
+</ul>
+<h1 id="цель-работы">Цель работы</h1>
+<p>Получить практические навыки работы в консоли с атрибутами файлов для групп пользователей</p>
+<h1 id="теоретическое-введение">Теоретическое введение</h1>
+<p><strong>Права доступа</strong> определяют, какие действия конкретный пользователь может или не может совершать с определенным файлами и каталогами. С помощью разрешений можно создать надежную среду — такую, в которой никто не может поменять содержимое ваших документов или повредить системные файлы. [1]</p>
+<p><strong>Группы пользователей Linux</strong> кроме стандартных root и users, здесь есть еще пару десятков групп. Это группы, созданные программами, для управления доступом этих программ к общим ресурсам. Каждая группа разрешает чтение или запись определенного файла или каталога системы, тем самым регулируя полномочия пользователя, а следовательно, и процесса, запущенного от этого пользователя. Здесь можно считать, что пользователь - это одно и то же что процесс, потому что у процесса все полномочия пользователя, от которого он запущен. [2]</p>
+<ul>
+<li>daemon - от имени этой группы и пользователя daemon запускаютcя сервисы, которым необходима возможность записи файлов на диск.</li>
+<li>sys - группа открывает доступ к исходникам ядра и файлам - include сохраненным в системе</li>
+<li>sync - позволяет выполнять команду /bin/sync</li>
+<li>games - разрешает играм записывать свои файлы настроек и историю в определенную папку</li>
+<li>man - позволяет добавлять страницы в директорию /var/cache/man</li>
+<li>lp - позволяет использовать устройства параллельных портов</li>
+<li>mail - позволяет записывать данные в почтовые ящики /var/mail/</li>
+<li>proxy - используется прокси серверами, нет доступа записи файлов на диск</li>
+<li>www-data - с этой группой запускается веб-сервер, она дает доступ на запись /var/www, где находятся файлы веб-документов</li>
+<li>list - позволяет просматривать сообщения в /var/mail</li>
+<li>nogroup - используется для процессов, которые не могут создавать файлов на жестком диске, а только читать, обычно применяется вместе с пользователем nobody.</li>
+<li>adm - позволяет читать логи из директории /var/log</li>
+<li>tty - все устройства /dev/vca разрешают доступ на чтение и запись пользователям из этой группы</li>
+<li>disk - открывает доступ к жестким дискам /dev/sd* /dev/hd*, можно сказать, что это аналог рут доступа.</li>
+<li>dialout - полный доступ к серийному порту</li>
+<li>cdrom - доступ к CD-ROM</li>
+<li>wheel - позволяет запускать утилиту sudo для повышения привилегий</li>
+<li>audio - управление аудиодрайвером</li>
+<li>src - полный доступ к исходникам в каталоге /usr/src/</li>
+<li>shadow - разрешает чтение файла /etc/shadow</li>
+<li>utmp - разрешает запись в файлы /var/log/utmp /var/log/wtmp</li>
+<li>video - позволяет работать с видеодрайвером</li>
+<li>plugdev - позволяет монтировать внешние устройства USB, CD и т д</li>
+<li>staff - разрешает запись в папку /usr/local</li>
+</ul>
+<h1 id="выполнение-лабораторной-работы">Выполнение лабораторной работы</h1>
+<h2 id="атрибуты-файлов">Атрибуты файлов</h2>
+<ol type="1">
+<li>В установленной операционной системе создайте учётную запись пользователя guest2 (используя учётную запись администратора)</li>
+</ol>
+<p>guest1 был создан в предыдущей лабораторной.</p>
+<ol start="2" type="1">
+<li><p>Задайте пароль для пользователя guest2</p></li>
+<li><p>Добавьте пользователя guest2 в группу guest:</p></li>
+</ol>
+<figure>
+<img src="image/image1.PNG" id="fig:001" style="width:70.0%;height:70.0%" alt="(рис. 1. 1-4 пункты задания лабораторной)" /><figcaption aria-hidden="true">(рис. 1. 1-4 пункты задания лабораторной)</figcaption>
+</figure>
+<ol start="4" type="1">
+<li><p>Осуществите вход в систему от двух пользователей на двух разных консолях: guest на первой консоли и guest2 на второй консоли</p></li>
+<li><p>Для обоих пользователей командой pwd определите директорию, в которой вы находитесь. Сравните её с приглашениями командной строки</p></li>
+<li><p>Уточните имя вашего пользователя, его группу, кто входит в неё и к каким группам принадлежит он сам. Определите командами groups guest и groups guest2, в какие группы входят пользователи guest и guest2. Сравните вывод команды groups с выводом команд id -Gn и id -G :</p></li>
+</ol>
+<figure>
+<img src="image/image2.PNG" id="fig:002" style="width:70.0%;height:70.0%" alt="(рис. 2. 5-7 пункты задания лабораторной)" /><figcaption aria-hidden="true">(рис. 2. 5-7 пункты задания лабораторной)</figcaption>
+</figure>
+<ol start="7" type="1">
+<li>Сравните полученную информацию с содержимым файла /etc/group :</li>
+</ol>
+<figure>
+<img src="image/image3.PNG" id="fig:003" style="width:70.0%;height:70.0%" alt="(рис. 3. 8 пункт задания лабораторной)" /><figcaption aria-hidden="true">(рис. 3. 8 пункт задания лабораторной)</figcaption>
+</figure>
+<ol start="8" type="1">
+<li>От имени пользователя guest2 выполните регистрацию пользователя guest2 в группе guest командой newgrp guest :</li>
+</ol>
+<figure>
+<img src="image/image4.PNG" id="fig:004" style="width:70.0%;height:70.0%" alt="(рис. 4. 9 пункт задания лабораторной)" /><figcaption aria-hidden="true">(рис. 4. 9 пункт задания лабораторной)</figcaption>
+</figure>
+<ol start="9" type="1">
+<li><p>От имени пользователя guest измените права директории /home/guest, разрешив все действия для пользователей группы: chmod g+rwx /home/guest</p></li>
+<li><p>От имени пользователя guest снимите с директории /home/guest/dir1 все атрибуты командой chmod 000 dir1 :</p></li>
+</ol>
+<figure>
+<img src="image/image5.PNG" id="fig:005" style="width:70.0%;height:70.0%" alt="(рис. 5. 10-11 пункты задания лабораторной)" /><figcaption aria-hidden="true">(рис. 5. 10-11 пункты задания лабораторной)</figcaption>
+</figure>
+<h2 id="заполнение-таблицы-3.1">Заполнение таблицы 3.1</h2>
+<ol start="11" type="1">
+<li>Меняя атрибуты у директории dir1 и файла file1 от имени пользователя guest и делая проверку от пользователя guest2, заполните табл. 3.1, определив опытным путём, какие операции разрешены, а какие нет. Если операция разрешена, занесите в таблицу знак «+», если не разрешена, знак «-». Сравните табл. 2.1 (из лабораторной работы № 2) и табл. 3.1.</li>
+</ol>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Права директории</th>
+<th style="text-align: left;">Права файла</th>
+<th>Создание файла</th>
+<th>Удаление файла</th>
+<th>Запись в файл</th>
+<th>Чтение файла</th>
+<th>Смена директории</th>
+<th>Просмотр файлов в директории</th>
+<th>Переименование файл</th>
+<th>Смена атрибутов файла</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>d--------- (000)</code></td>
+<td style="text-align: left;"><code>---------- (000)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d-----x--- (010)</code></td>
+<td style="text-align: left;"><code>---------- (000)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d----w---- (020)</code></td>
+<td style="text-align: left;"><code>---------- (000)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d----wx--- (030)</code></td>
+<td style="text-align: left;"><code>---------- (000)</code></td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---r----- (040)</code></td>
+<td style="text-align: left;"><code>---------- (000)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---r-x--- (050)</code></td>
+<td style="text-align: left;"><code>---------- (000)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---rw---- (060)</code></td>
+<td style="text-align: left;"><code>---------- (000)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---rwx--- (070)</code></td>
+<td style="text-align: left;"><code>---------- (000)</code></td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d--------- (000)</code></td>
+<td style="text-align: left;"><code>------x--- (010)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d-----x--- (010)</code></td>
+<td style="text-align: left;"><code>------x--- (010)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d----w---- (020)</code></td>
+<td style="text-align: left;"><code>------x--- (010)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d----wx--- (030)</code></td>
+<td style="text-align: left;"><code>------x--- (010)</code></td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---r----- (040)</code></td>
+<td style="text-align: left;"><code>------x--- (010)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---r-x--- (050)</code></td>
+<td style="text-align: left;"><code>------x--- (010)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---rw---- (060)</code></td>
+<td style="text-align: left;"><code>------x--- (010)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---rwx--- (070)</code></td>
+<td style="text-align: left;"><code>------x--- (010)</code></td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d--------- (000)</code></td>
+<td style="text-align: left;"><code>-----w---- (020)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d-----x--- (010)</code></td>
+<td style="text-align: left;"><code>-----w---- (020)</code></td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d----w---- (020)</code></td>
+<td style="text-align: left;"><code>-----w---- (020)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d----wx--- (030)</code></td>
+<td style="text-align: left;"><code>-----w---- (020)</code></td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---r----- (040)</code></td>
+<td style="text-align: left;"><code>-----w---- (020)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---r-x--- (050)</code></td>
+<td style="text-align: left;"><code>-----w---- (020)</code></td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---rw---- (060)</code></td>
+<td style="text-align: left;"><code>-----w---- (020)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---rwx--- (070)</code></td>
+<td style="text-align: left;"><code>-----w---- (020)</code></td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d--------- (000)</code></td>
+<td style="text-align: left;"><code>-----wx--- (030)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d-----x--- (010)</code></td>
+<td style="text-align: left;"><code>-----wx--- (030)</code></td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d----w---- (020)</code></td>
+<td style="text-align: left;"><code>-----wx--- (030)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d----wx--- (030)</code></td>
+<td style="text-align: left;"><code>-----wx--- (030)</code></td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---r----- (040)</code></td>
+<td style="text-align: left;"><code>-----wx--- (030)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---r-x--- (050)</code></td>
+<td style="text-align: left;"><code>-----wx--- (030)</code></td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---rw---- (060)</code></td>
+<td style="text-align: left;"><code>-----wx--- (030)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---rwx--- (070)</code></td>
+<td style="text-align: left;"><code>-----wx--- (030)</code></td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d--------- (000)</code></td>
+<td style="text-align: left;"><code>----r----- (040)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d-----x--- (010)</code></td>
+<td style="text-align: left;"><code>----r----- (040)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d----w---- (020)</code></td>
+<td style="text-align: left;"><code>----r----- (040)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d----wx--- (030)</code></td>
+<td style="text-align: left;"><code>----r----- (040)</code></td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---r----- (040)</code></td>
+<td style="text-align: left;"><code>----r----- (040)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---r-x--- (050)</code></td>
+<td style="text-align: left;"><code>----r----- (040)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---rw---- (060)</code></td>
+<td style="text-align: left;"><code>----r----- (040)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---rwx--- (070)</code></td>
+<td style="text-align: left;"><code>----r----- (040)</code></td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d--------- (000)</code></td>
+<td style="text-align: left;"><code>----r-x--- (050)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d-----x--- (010)</code></td>
+<td style="text-align: left;"><code>----r-x--- (050)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d----w---- (020)</code></td>
+<td style="text-align: left;"><code>----r-x--- (050)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d----wx--- (030)</code></td>
+<td style="text-align: left;"><code>----r-x--- (050)</code></td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---r----- (040)</code></td>
+<td style="text-align: left;"><code>----r-x--- (050)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---r-x--- (050)</code></td>
+<td style="text-align: left;"><code>----r-x--- (050)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---rw---- (060)</code></td>
+<td style="text-align: left;"><code>----r-x--- (050)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---rwx--- (070)</code></td>
+<td style="text-align: left;"><code>----r-x--- (050)</code></td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d--------- (000)</code></td>
+<td style="text-align: left;"><code>----rw---- (060)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d-----x--- (010)</code></td>
+<td style="text-align: left;"><code>----rw---- (060)</code></td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d----w---- (020)</code></td>
+<td style="text-align: left;"><code>----rw---- (060)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d----wx--- (030)</code></td>
+<td style="text-align: left;"><code>----rw---- (060)</code></td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---r----- (040)</code></td>
+<td style="text-align: left;"><code>----rw---- (060)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---r-x--- (050)</code></td>
+<td style="text-align: left;"><code>----rw---- (060)</code></td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---rw---- (060)</code></td>
+<td style="text-align: left;"><code>----rw---- (060)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---rwx--- (070)</code></td>
+<td style="text-align: left;"><code>----rw---- (060)</code></td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d--------- (000)</code></td>
+<td style="text-align: left;"><code>----rwx--- (070)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d-----x--- (010)</code></td>
+<td style="text-align: left;"><code>----rwx--- (070)</code></td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d----w---- (020)</code></td>
+<td style="text-align: left;"><code>----rwx--- (070)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d----wx--- (030)</code></td>
+<td style="text-align: left;"><code>----rwx--- (070)</code></td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---r----- (040)</code></td>
+<td style="text-align: left;"><code>----rwx--- (070)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---r-x--- (050)</code></td>
+<td style="text-align: left;"><code>----rwx--- (070)</code></td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>d---rw---- (060)</code></td>
+<td style="text-align: left;"><code>----rwx--- (070)</code></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>d---rwx--- (070)</code></td>
+<td style="text-align: left;"><code>----rwx--- (070)</code></td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+</tr>
+</tbody>
+</table>
+<p>Таблица 3.1 «Установленные права и разрешённые действия для групп»</p>
+<h2 id="заполнение-таблицы-3.2">Заполнение таблицы 3.2</h2>
+<ol start="12" type="1">
+<li>На основании заполненной таблицы определите те или иные минимально необходимые права для выполнения пользователем guest2 операций внутри директории dir1 и заполните табл. 3.2</li>
+</ol>
+<table>
+<thead>
+<tr class="header">
+<th>Операция</th>
+<th>Права на директорию</th>
+<th>Права на файл</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Создание файла</td>
+<td><code>d----wx--- (030)</code></td>
+<td><code>---------- (000)</code></td>
+</tr>
+<tr class="even">
+<td>Удаление файла</td>
+<td><code>d----wx--- (030)</code></td>
+<td><code>---------- (000)</code></td>
+</tr>
+<tr class="odd">
+<td>Чтение файла</td>
+<td><code>d-----x--- (010)</code></td>
+<td><code>----r----- (040)</code></td>
+</tr>
+<tr class="even">
+<td>Запись в файл</td>
+<td><code>d-----x--- (010)</code></td>
+<td><code>-----w---- (020)</code></td>
+</tr>
+<tr class="odd">
+<td>Переименование файла</td>
+<td><code>d----wx--- (030)</code></td>
+<td><code>---------- (000)</code></td>
+</tr>
+<tr class="even">
+<td>Создание поддиректории</td>
+<td><code>d----wx--- (030)</code></td>
+<td><code>---------- (000)</code></td>
+</tr>
+<tr class="odd">
+<td>Удаление поддиректории</td>
+<td><code>d----wx--- (030)</code></td>
+<td><code>---------- (000)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Таблица 3.2 «Минимальные права для совершения операций от имени пользователей входящих в группу»</p>
+<p>Сравнивая таблицу 3.1. с таблицей 2.1, можно сказать, что они одинаковы. Единственное различие в том, что в предыдущий раз мы присваивали права владельцу, а в этот раз группе.</p>
+<h1 id="вывод">Вывод</h1>
+<p>Были получены практические навыки работы в консоли с атрибутами файлов для групп пользователей</p>
+<h1 id="список-литературы.-библиография">Список литературы. Библиография</h1>
+<p>[0] Методические материалы курса</p>
+<p>[1] Права доступа: https://codechick.io/tutorials/unix-linux/unix-linux-permissions</p>
+<p>[2] Группы пользователей: https://losst.pro/gruppy-polzovatelej-linux#%D0%A7%D1%82%D0%BE_%D1%82%D0%B0%D0%BA%D0%BE%D0%B5_%D0%B3%D1%80%D1%83%D0%BF%D0%BF%D1%8B</p>
