@@ -1,0 +1,96 @@
+<hr />
+<h2 id="front-matter">Front matter</h2>
+<p>title: "Отчёт по лабораторной работе №4</p>
+<p>Информационная безопасность" subtitle: “Дискреционное разграничение прав в Linux. Расширенные атрибуты” author: “Выполнил: Фаик Карим Яссерович”</p>
+<h2 id="generic-otions">Generic otions</h2>
+<p>lang: ru-RU toc-title: “Содержание”</p>
+<h2 id="bibliography">Bibliography</h2>
+<p>bibliography: bib/cite.bib csl: pandoc/csl/gost-r-7-0-5-2008-numeric.csl</p>
+<h2 id="pdf-output-format">Pdf output format</h2>
+toc: true # Table of contents toc-depth: 2 lof: true # List of figures fontsize: 12pt linestretch: 1.5 papersize: a4 documentclass: scrreprt ## I18n polyglossia polyglossia-lang: name: russian options: - spelling=modern - babelshorthands=true polyglossia-otherlangs: name: english ## I18n babel babel-lang: russian babel-otherlangs: english ## Fonts mainfont: PT Serif romanfont: PT Serif sansfont: PT Sans monofont: PT Mono mainfontoptions: Ligatures=TeX romanfontoptions: Ligatures=TeX sansfontoptions: Ligatures=TeX,Scale=MatchLowercase monofontoptions: Scale=MatchLowercase,Scale=0.9 ## Biblatex biblatex: true biblio-style: “gost-numeric” biblatexoptions: - parentracker=true - backend=biber - hyperref=auto - language=auto - autolang=other* - citestyle=gost-numeric ## Pandoc-crossref LaTeX customization figureTitle: “Рис.” tableTitle: “Таблица” listingTitle: “Листинг” lofTitle: “Список иллюстраций” lolTitle: “Листинги” ## Misc options indent: true header-includes: -
+<ul>
+<li><h1 id="keep-figures-where-there-are-in-the-text">keep figures where there are in the text</h1>
+<ul>
+<li><h2 id="keep-figures-where-there-are-in-the-text-1"> # keep figures where there are in the text</h2></li>
+</ul></li>
+</ul>
+<h1 id="цель-работы">Цель работы</h1>
+<p>Получить практические навыки работы в консоли с расширенными атрибутами файлов</p>
+<h1 id="теоретическое-введение">Теоретическое введение</h1>
+<p><strong>Права доступа</strong> определяют, какие действия конкретный пользователь может или не может совершать с определенным файлами и каталогами. С помощью разрешений можно создать надежную среду — такую, в которой никто не может поменять содержимое ваших документов или повредить системные файлы. [1]</p>
+<p><strong>Расширенные атрибуты файлов Linux</strong> представляют собой пары имя:значение, которые постоянно связаны с файлами и каталогами, подобно тому как строки окружения связаны с процессом. Атрибут может быть определён или не определён. Если он определён, то его значение может быть или пустым, или не пустым. [2]</p>
+<p>Расширенные атрибуты дополняют обычные атрибуты, которые связаны со всеми inode в файловой системе (т. е., данные stat(2)). Часто они используются для предоставления дополнительных возможностей файловой системы, например, дополнительные возможности безопасности, такие как списки контроля доступа (ACL), могут быть реализованы через расширенные атрибуты. [3]</p>
+<p><em>Установить атрибуты:</em></p>
+<ul>
+<li>chattr filename</li>
+</ul>
+<p><em>Значения:</em></p>
+<ul>
+<li><p>chattr +a # только добавление. Удаление и переименование запрещено;</p></li>
+<li><p>chattr +A # не фиксировать данные об обращении к файлу</p></li>
+<li><p>chattr +c # сжатый файл</p></li>
+<li><p>chattr +d # неархивируемый файл</p></li>
+<li><p>chattr +i # неизменяемый файл</p></li>
+<li><p>chattr +S # синхронное обновление</p></li>
+<li><p>chattr +s # безопасное удаление, (после удаления место на диске переписывается нулями)</p></li>
+<li><p>chattr +u # неудаляемый файл</p></li>
+<li><p>chattr -R # рекурсия</p></li>
+</ul>
+<p><em>Просмотреть атрибуты:</em></p>
+<ul>
+<li>lsattr filename</li>
+</ul>
+<p><em>Опции:</em></p>
+<ul>
+<li><p>lsattr -R # рекурсия</p></li>
+<li><p>lsattr -a # вывести все файлы (включая скрытые)</p></li>
+<li><p>lsattr -d # не выводить содержимое директории</p></li>
+</ul>
+<h1 id="выполнение-лабораторной-работы">Выполнение лабораторной работы</h1>
+<ol type="1">
+<li><p>От имени пользователя guest определите расширенные атрибуты файла /home/guest/dir1/file1 командой lsattr /home/guest/dir1/file1</p></li>
+<li><p>Установите командой chmod 600 file1 на файл file1 права, разрешающие чтение и запись для владельца файла.</p></li>
+<li><p>Попробуйте установить на файл /home/guest/dir1/file1 расширенный атрибут a от имени пользователя guest: chattr +a /home/guest/dir1/file1 В ответ вы должны получить отказ от выполнения операции.</p></li>
+<li><p>Зайдите на третью консоль с правами администратора либо повысьте свои права с помощью команды su. Попробуйте установить расширенный атрибут a на файл /home/guest/dir1/file1 от имени суперпользователя: chattr +a /home/guest/dir1/file1</p></li>
+<li><p>От пользователя guest проверьте правильность установления атрибута: lsattr /home/guest/dir1/file1</p></li>
+</ol>
+<figure>
+<img src="image/image1.PNG" id="fig:001" style="width:70.0%;height:70.0%" alt="(рис. 1. 1-5 пункты задания лабораторной)" /><figcaption aria-hidden="true">(рис. 1. 1-5 пункты задания лабораторной)</figcaption>
+</figure>
+<ol start="6" type="1">
+<li>Выполните дозапись в файл file1 слова «test» командой echo “test” /home/guest/dir1/file1 После этого выполните чтение файла file1 командой cat /home/guest/dir1/file1 Убедитесь, что слово test было успешно записано в file1.</li>
+</ol>
+<figure>
+<img src="image/image2.PNG" id="fig:002" style="width:70.0%;height:70.0%" alt="(рис. 2. 6 пункт задания лабораторной)" /><figcaption aria-hidden="true">(рис. 2. 6 пункт задания лабораторной)</figcaption>
+</figure>
+<ol start="7" type="1">
+<li>Попробуйте удалить файл file1 либо стереть имеющуюся в нём информацию командой echo “abcd” &gt; /home/guest/dirl/file1 Попробуйте переименовать файл.</li>
+</ol>
+<figure>
+<img src="image/image3.PNG" id="fig:003" style="width:70.0%;height:70.0%" alt="(рис. 3. 7 пункт задания лабораторной)" /><figcaption aria-hidden="true">(рис. 3. 7 пункт задания лабораторной)</figcaption>
+</figure>
+<ol start="8" type="1">
+<li>Попробуйте с помощью команды chmod 000 file1 установить на файл file1 права, например, запрещающие чтение и запись для владельца файла. Удалось ли вам успешно выполнить указанные команды?</li>
+</ol>
+<p>Этого сделать не удалось.</p>
+<ol start="9" type="1">
+<li>Снимите расширенный атрибут a с файла /home/guest/dirl/file1 от имени суперпользователя командой chattr -a /home/guest/dir1/file1 Повторите операции, которые вам ранее не удавалось выполнить.</li>
+</ol>
+<p>Теперь все операции выполняются.</p>
+<figure>
+<img src="image/image4.PNG" id="fig:004" style="width:70.0%;height:70.0%" alt="(рис. 4. 9 пункт задания лабораторной)" /><figcaption aria-hidden="true">(рис. 4. 9 пункт задания лабораторной)</figcaption>
+</figure>
+<ol start="10" type="1">
+<li>Повторите ваши действия по шагам, заменив атрибут «a» атрибутом «i». Удалось ли вам дозаписать информацию в файл?</li>
+</ol>
+<p>Дозаписать информацию в файл не удалось.</p>
+<figure>
+<img src="image/image5.PNG" id="fig:005" style="width:70.0%;height:70.0%" alt="(рис. 5. 10 пункт задания лабораторной)" /><figcaption aria-hidden="true">(рис. 5. 10 пункт задания лабораторной)</figcaption>
+</figure>
+<h1 id="вывод">Вывод</h1>
+<p>Были получены практические навыки работы в консоли с расширенными атрибутами файлов</p>
+<h1 id="список-литературы.-библиография">Список литературы. Библиография</h1>
+<p>[0] Методические материалы курса</p>
+<p>[1] Права доступа: https://codechick.io/tutorials/unix-linux/unix-linux-permissions</p>
+<p>[2] Расширенные атрибуты: https://ru.manpages.org/xattr/7</p>
+<p>[3] Операции с расширенными атрибутами: https://p-n-z-8-8.livejournal.com/64493.html</p>
